@@ -2,7 +2,9 @@ import tensorflow as tf
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from resources.dataset import get_dataset
-from resources.preprocessing import preprocessing_input
+from resources.preprocessing import preprocessing_input, preprocessing_dataset
+from resources.evaluate import evaluate
+import json
 
 
 app = Flask(__name__)
@@ -44,6 +46,36 @@ def end_dataset():
                   "false_label": false_label
                   })
 
+@app.route('/model')
+@cross_origin()
+def end_model():
+  model = tf.keras.models.load_model('resources/model.h5')
+  model_config = model.get_config()
+  model_compile = model.get_compile_config()
+  json_model_config = json.loads(json.dumps(model_config))
+  json_model_compile = json.loads(json.dumps(model_compile))
+
+  X_train, X_test, y_train, y_test = preprocessing_dataset()
+  con_matrix, accuracy, precision, recall = evaluate(X_test, y_test, model)
+
+  lib_info = {
+    "name": "tensorflow",
+    "source": "https://www.tensorflow.org/",
+    "description": "TensorFlow makes it easy to create ML models that can run in any environment. Learn how to use the intuitive APIs through interactive code samples",
+    "logo": "https://www.gstatic.com/devrel-devsite/prod/v870e399c64f7c43c99a3043db4b3a74327bb93d0914e84a0c3dba90bbfd67625/tensorflow/images/lockup.svg"
+  }
+
+  return jsonify({ "model_config": json_model_config,
+                   "model_compile": json_model_compile,
+                   "evaluate": {
+                     "con_matrix": con_matrix,
+                     "accuracy": accuracy,
+                     "precision": precision,
+                     "recall": recall
+                   },
+                   "lib_info": lib_info
+                 })
+
 @app.route('/predict', methods=['POST'])
 @cross_origin()
 def end_predict():
@@ -56,4 +88,4 @@ def end_predict():
   return jsonify({"prediction": predicted})
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run()
