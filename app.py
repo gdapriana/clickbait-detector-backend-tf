@@ -54,17 +54,13 @@ def end_model():
   model_compile = model.get_compile_config()
   json_model_config = json.loads(json.dumps(model_config))
   json_model_compile = json.loads(json.dumps(model_compile))
-
-  X_train, X_test, y_train, y_test = preprocessing_dataset()
-  con_matrix, accuracy, precision, recall = evaluate(X_test, y_test, model)
-
+  con_matrix, accuracy, precision, recall = evaluate()
   lib_info = {
     "name": "tensorflow",
     "source": "https://www.tensorflow.org/",
     "description": "TensorFlow makes it easy to create ML models that can run in any environment. Learn how to use the intuitive APIs through interactive code samples",
     "logo": "https://www.gstatic.com/devrel-devsite/prod/v870e399c64f7c43c99a3043db4b3a74327bb93d0914e84a0c3dba90bbfd67625/tensorflow/images/lockup.svg"
   }
-
   return jsonify({ "model_config": json_model_config,
                    "model_compile": json_model_compile,
                    "evaluate": {
