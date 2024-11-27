@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 from resources.dataset import get_dataset
 from resources.preprocessing import preprocessing_input, preprocessing_dataset
 from resources.evaluate import evaluate
+from resources.member import member
 import json
 
 
@@ -71,6 +72,13 @@ def end_model():
                    },
                    "lib_info": lib_info
                  })
+
+@app.route('/member')
+@cross_origin()
+def end_member():
+  all_member = json.loads(json.dumps(member()))
+  return jsonify({"all_member": all_member})
+
 
 @app.route('/predict', methods=['POST'])
 @cross_origin()
